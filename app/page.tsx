@@ -14,24 +14,38 @@ export default function Home() //画面全体
   const [title,setTitle]= useState("");
   const [content,setContent]= useState("");
   const [image,setImage]=useState("");
+  const [video,setVideo]=useState("");
 
 const [diaries,setDiaries]= useState<
-{title:string; content:string; date:string; image:string}[]
+{
+  title:string;
+  content:string;
+  date:string;
+  image:string;
+  video:string;
+}[]
 >([]);
 
 const addDiary =()=>{
-if(title===""||content==="")return;
+
+  if(title===""||content==="")return;
+
 const newDiary={
+
 title:title,
 content: content,
 date: new Date().toLocaleDateString(),
 image:image,
+video:video,
+
 };
 setDiaries([newDiary,...diaries]);
 
 setTitle("");
 setContent("");
 setImage("");
+setVideo("");
+
 };
 const deleteDiary=(index:number)=>{
 
@@ -44,20 +58,26 @@ const deleteDiary=(index:number)=>{
   );
 setDiaries(newDiaries);
 };
+
 useEffect(()=>{
 const savedDiaries=localStorage.getItem("diaries");
 //localStorage.getItem=>保存された("  ")取得
+
 if(savedDiaries){
   setDiaries(JSON.parse(savedDiaries));
   //JSON.parse=>日記データを戻す
 }
+
 },[]);
 //[]->最初の一回だけ実行
+
 useEffect(()=>{
 localStorage.setItem(
-  "diaries",JSON.stringify(diaries));
+"diaries",JSON.stringify(diaries));
+
 },[diaries]);
-  return (
+
+return (
     <main className="min-h-screen bg-sky-100 p-8">
       <h1 className="text-4xl font-bold mb-6 text-pink-500 ">
          私の思い出
@@ -95,6 +115,19 @@ const imageUrl =URL.createObjectURL(file);
 setImage(imageUrl);
 }}
 />
+<input
+type="file"
+accept="video/*"
+
+onChange={(e)=>{
+
+const file = e.target.files?.[0];
+if(!file) return;
+const videoUrl=URL.createObjectURL(file);
+setVideo(videoUrl);
+
+}}
+/>
 
 <button 
 onClick={addDiary}
@@ -119,7 +152,7 @@ className="bg-white p-5 rounded-2xl shadow-md mb-4"
   {diary.date}
 </p>
 
- {diary.image&&(
+ {diary.image &&(
 
 <img
 src={diary.image}
@@ -127,7 +160,20 @@ alt="diary image"
 className="w-full rounded-xl mb-4"
 
 />
-  )}
+)}
+
+{diary.video &&(
+
+<video
+src={diary.video}
+controls
+className="w-full rounded-xl mb-4"
+//w-full 横幅いっぱい表示
+//rounded-xl　角丸
+//mb-4　下余白
+/>
+)}
+
 <p className="text-gray-800 whitespace-pre-wrap">
   {diary.content}
 </p>
