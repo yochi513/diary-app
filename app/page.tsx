@@ -9,12 +9,14 @@ export default function Home() //画面全体
   //div箱みたいな物
   //=>処理する方法
   //p 本文表示
-  //confirmブラウザ標準機能
+
 
   const [title,setTitle]= useState("");
   const [content,setContent]= useState("");
   const [image,setImage]=useState("");
   const [video,setVideo]=useState("");
+  const [editIndex,setEditIndex]=useState<number|null>(null);
+
 
 const [diaries,setDiaries]= useState<
 {
@@ -39,7 +41,18 @@ image:image,
 video:video,
 
 };
-setDiaries([newDiary,...diaries]);
+
+//編集中なら上書き。そうじゃないなら追加
+if(editIndex !==null){
+
+  const newDiaries=[...diaries];
+  newDiaries[editIndex]=newDiary;
+  setDiaries(newDiaries);
+  setEditIndex(null);
+}
+else{
+  setDiaries([newDiary,...diaries]);
+}
 
 setTitle("");
 setContent("");
@@ -47,8 +60,9 @@ setImage("");
 setVideo("");
 
 };
-const deleteDiary=(index:number)=>{
 
+const deleteDiary=(index:number)=>{
+  //confirmブラウザ標準機能
   const check = confirm("本当に削除しますか？");
 
   if(!check) return;
@@ -94,12 +108,14 @@ onChange={(e)=>setTitle(e.target.value)}
 className="w-full border p-1 rounded-lg mb-4 placeholder-gray-400 text-black"
 />
 
+
 <textarea
 placeholder="今日の出来事を書こう・・・"
 value={content}
 onChange={(e)=>setContent(e.target.value)}
 className="w-full border p-3 rounded-lg mb-4 h-40 placeholder-gray-400 text-black"
 />
+
 
 <input
 //file=ファイル選択
@@ -115,6 +131,7 @@ const imageUrl =URL.createObjectURL(file);
 setImage(imageUrl);
 }}
 />
+
 <input
 type="file"
 accept="video/*"
@@ -132,7 +149,7 @@ setVideo(videoUrl);
 <button 
 onClick={addDiary}
 className="bg-blue-500 text-white px-10 py-4 rounded-2xl">
-  投稿する
+ {editIndex !==null ? "更新する":"投稿する"}
 </button>
 
       </div>
@@ -184,6 +201,19 @@ className="mt-4 bg-red-500 text-white px-4 py-2 rounded-lg">
   削除
 </button>
 
+<button
+onClick={()=>{
+console.log("編集押された")
+   setTitle(diary.title);
+   setContent(diary.content);
+   setImage(diary.image);
+   setVideo(diary.video);
+   setEditIndex(index);
+}}
+className="mt-4 mr-2 bg-yellow-500 text-white px-4 py-2 rounded-lg"
+>
+  編集
+</button>
 </div>
 ))}
 
