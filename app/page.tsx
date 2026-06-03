@@ -1,5 +1,6 @@
 "use client"
-import{useState}from "react";
+//useEffect->何かのタイミングで自動実行する機能
+import{useState,useEffect}from "react";
 export default function Home() //画面全体
 {
   //h1で大きいタイトル
@@ -12,9 +13,10 @@ export default function Home() //画面全体
 
   const [title,setTitle]= useState("");
   const [content,setContent]= useState("");
+  const [image,setImage]=useState("");
 
 const [diaries,setDiaries]= useState<
-{title:string; content:string; date:string}[]
+{title:string; content:string; date:string; image:string}[]
 >([]);
 
 const addDiary =()=>{
@@ -23,11 +25,13 @@ const newDiary={
 title:title,
 content: content,
 date: new Date().toLocaleDateString(),
+image:image,
 };
 setDiaries([newDiary,...diaries]);
 
 setTitle("");
 setContent("");
+setImage("");
 };
 const deleteDiary=(index:number)=>{
 
@@ -40,8 +44,19 @@ const deleteDiary=(index:number)=>{
   );
 setDiaries(newDiaries);
 };
-
-
+useEffect(()=>{
+const savedDiaries=localStorage.getItem("diaries");
+//localStorage.getItem=>保存された("  ")取得
+if(savedDiaries){
+  setDiaries(JSON.parse(savedDiaries));
+  //JSON.parse=>日記データを戻す
+}
+},[]);
+//[]->最初の一回だけ実行
+useEffect(()=>{
+localStorage.setItem(
+  "diaries",JSON.stringify(diaries));
+},[diaries]);
   return (
     <main className="min-h-screen bg-sky-100 p-8">
       <h1 className="text-4xl font-bold mb-6 text-pink-500 ">
@@ -49,6 +64,7 @@ setDiaries(newDiaries);
       </h1>
 
 <div className="bg-white p-6 rounded-2xl shadow-md max-w-xl">
+
 
 <input
 type="text"
@@ -63,6 +79,21 @@ placeholder="今日の出来事を書こう・・・"
 value={content}
 onChange={(e)=>setContent(e.target.value)}
 className="w-full border p-3 rounded-lg mb-4 h-40 placeholder-gray-400 text-black"
+/>
+
+<input
+//file=ファイル選択
+type="file"
+//image=画像選択
+accept="image/*"
+
+onChange={(e)=>{
+const file = e.target.files?.[0];
+if(!file) return;
+//ブラウザ表示するためのURL
+const imageUrl =URL.createObjectURL(file);
+setImage(imageUrl);
+}}
 />
 
 <button 
@@ -88,6 +119,15 @@ className="bg-white p-5 rounded-2xl shadow-md mb-4"
   {diary.date}
 </p>
 
+ {diary.image&&(
+
+<img
+src={diary.image}
+alt="diary image"
+className="w-full rounded-xl mb-4"
+
+/>
+  )}
 <p className="text-gray-800 whitespace-pre-wrap">
   {diary.content}
 </p>
