@@ -1,6 +1,9 @@
 "use client"
 //useEffect->何かのタイミングで自動実行する機能
 import{useState,useEffect}from "react";
+import { addDoc, collection,getDocs } from "firebase/firestore";
+import { db } from "../firebase/firebase";
+
 export default function Home() //画面全体
 {
   //h1で大きいタイトル
@@ -34,7 +37,7 @@ const [diaries,setDiaries]= useState<
 }[]
 >([]);
 
-const addDiary =()=>{
+const addDiary =async ()=>{
 
   if(title===""||content==="")return;
 
@@ -48,6 +51,22 @@ video:video,
 
 };
 
+//await addDoc(collection(db,"diaries"),newDiary);
+try {
+
+  await addDoc(
+    collection(db, "diaries"),
+    newDiary
+  );
+
+  console.log("保存成功");
+
+}
+catch(error){
+
+  console.error("保存失敗", error);
+
+}
 //編集中なら上書き。そうじゃないなら追加
 if(editIndex !==null){
 
@@ -79,14 +98,23 @@ const deleteDiary=(index:number)=>{
 setDiaries(newDiaries);
 };
 
-useEffect(()=>{
-const savedDiaries=localStorage.getItem("diaries");
-//localStorage.getItem=>保存された("  ")取得
 
-if(savedDiaries){
-  setDiaries(JSON.parse(savedDiaries));
-  //JSON.parse=>日記データを戻す
-}
+useEffect(() => {
+
+  const loadDiaries = async () => {
+
+    const querySnapshot = await getDocs(
+      collection(db, "diaries")
+    );
+
+    const diaryList = querySnapshot.docs.map(
+      (doc) => doc.data()
+    );
+
+    setDiaries(diaryList as any);
+  };
+
+  loadDiaries();
 
 },[]);
 //[]->最初の一回だけ実行
